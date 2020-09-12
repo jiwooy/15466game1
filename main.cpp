@@ -21,6 +21,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <memory>
+#include <thread>         // std::this_thread::sleep_for
 #include <algorithm>
 
 int main(int argc, char **argv) {
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
 
 	//create window:
 	SDL_Window *window = SDL_CreateWindow(
-		"gp20 game1: remember to change your title", //TODO: remember to set a title for your game!
+		"Pandemic Escape!", //TODO: remember to set a title for your game!
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		2*PPU466::ScreenWidth + 8, 2*PPU466::ScreenHeight + 8, //TODO: modify window size if you'd like
 		SDL_WINDOW_OPENGL
@@ -90,7 +91,14 @@ int main(int argc, char **argv) {
 	//SDL_ShowCursor(SDL_DISABLE);
 
 	//------------ load assets --------------
-	call_load_functions();
+
+	// printf("adding ");
+	// add_load_function(LoadTagDefault, png_to_tile(PlayMode));
+	// printf("done adding\n");
+
+	// printf("call load");
+	// call_load_functions();
+	// printf("done load\n");
 
 	//------------ create game mode + make current --------------
 	Mode::set_current(std::make_shared< PlayMode >());
