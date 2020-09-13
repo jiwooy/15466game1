@@ -61,7 +61,7 @@ struct PlayMode : Mode {
 			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 		};
 		uint8_t colors = 0;
-		for (int i = 0; i < picdata.size(); i++) { // get colors for palette
+		for (uint8_t i = 0; i < picdata.size(); i++) { // get colors for palette
 			if (picdata[i].a != 0 && colors < 4) {
 				bool notin = true;
 				for (int j = 0; j < colors; j++) {
@@ -92,23 +92,23 @@ struct PlayMode : Mode {
 			for (int j = 0; j < 8; j++) {
 				//printf("%d %d %d %d \n", picdata[(i * 8) + j].r,  picdata[(i * 8) + j].g,
 				//picdata[(i * 8) + j].b, picdata[(i * 8) + j].a);
-				uint8_t xor = 1 << bit;
+				uint8_t oper = 1 << bit;
 				if (picdata[(i * 8) + j].r == ppu.palette_table[palette][0].r &&
 					picdata[(i * 8) + j].g == ppu.palette_table[palette][0].g &&
 					picdata[(i * 8) + j].b == ppu.palette_table[palette][0].b &&
 					picdata[(i * 8) + j].a == ppu.palette_table[palette][0].a) {
-					row0 ^= xor;
-					row1 ^= xor;
+					row0 ^= oper;
+					row1 ^= oper;
 				} else if (picdata[(i * 8) + j].r == ppu.palette_table[palette][1].r &&
 					picdata[(i * 8) + j].g == ppu.palette_table[palette][1].g &&
 					picdata[(i * 8) + j].b == ppu.palette_table[palette][1].b &&
 					picdata[(i * 8) + j].a == ppu.palette_table[palette][1].a) {
-					row1 ^= xor;
+					row1 ^= oper;
 				} else if (picdata[(i * 8) + j].r == ppu.palette_table[palette][2].r &&
 					picdata[(i * 8) + j].g == ppu.palette_table[palette][2].g &&
 					picdata[(i * 8) + j].b == ppu.palette_table[palette][2].b &&
 					picdata[(i * 8) + j].a == ppu.palette_table[palette][2].a) {
-					row0 ^= xor;
+					row0 ^= oper;
 				} else if (picdata[(i * 8) + j].r == ppu.palette_table[palette][3].r &&
 					picdata[(i * 8) + j].g == ppu.palette_table[palette][3].g &&
 					picdata[(i * 8) + j].b == ppu.palette_table[palette][3].b &&
