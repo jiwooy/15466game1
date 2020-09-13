@@ -21,6 +21,8 @@ struct PlayMode : Mode {
 	virtual bool handle_event(SDL_Event const &, glm::uvec2 const &window_size) override;
 	virtual void update(float elapsed) override;
 	virtual void draw(glm::uvec2 const &drawable_size) override;
+	virtual uint8_t platform();
+	virtual void update_platforms();
 
 	//----- game state -----
 
@@ -33,8 +35,15 @@ struct PlayMode : Mode {
 	//some weird background animation:
 	float background_fade = 0.0f;
 
+	float yvel = 0.0f;
+	float gravity = -100.0f;
+	float jump = 130.0f;
+	float PlayerSpeed = 100.0f;
+
+	uint8_t numPlatforms = 9;
+
 	//player position:
-	glm::vec2 player_at = glm::vec2(0.0f);
+	glm::vec2 player_at = glm::vec2(120.0f, 30.0f);
 
 	//----- drawing handled by PPU466 -----
 
@@ -45,7 +54,6 @@ struct PlayMode : Mode {
 		glm::uvec2 size = glm::ivec2(8,8);
 		std::vector< glm::u8vec4 > picdata(8*8);
 		load_png(f, &size, &picdata, LowerLeftOrigin);
-		printf("Print stuff \n");
 		ppu.palette_table[palette] = {
 			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
@@ -71,19 +79,19 @@ struct PlayMode : Mode {
 				}
 			}
 		}
-		printf("colors %d\n", colors);
-		for (int i = 0; i < colors; i ++) {
-			printf("%d %d %d %d \n", ppu.palette_table[7][i].r,  ppu.palette_table[7][i].g,
-			ppu.palette_table[7][i].b, ppu.palette_table[7][i].a);
-		}
+		// printf("colors %d\n", colors);
+		// for (int i = 0; i < colors; i ++) {
+		// 	printf("%d %d %d %d \n", ppu.palette_table[7][i].r,  ppu.palette_table[7][i].g,
+		// 	ppu.palette_table[7][i].b, ppu.palette_table[7][i].a);
+		// }
 
 		for (int i = 0; i < picdata.size() / 8; i++) {
 			uint8_t row0 = 0b11111111;
 			uint8_t row1 = 0b11111111;
 			uint8_t bit = 0;
 			for (int j = 0; j < 8; j++) {
-				printf("%d %d %d %d \n", picdata[(i * 8) + j].r,  picdata[(i * 8) + j].g,
-				picdata[(i * 8) + j].b, picdata[(i * 8) + j].a);
+				//printf("%d %d %d %d \n", picdata[(i * 8) + j].r,  picdata[(i * 8) + j].g,
+				//picdata[(i * 8) + j].b, picdata[(i * 8) + j].a);
 				uint8_t xor = 1 << bit;
 				if (picdata[(i * 8) + j].r == ppu.palette_table[palette][0].r &&
 					picdata[(i * 8) + j].g == ppu.palette_table[palette][0].g &&
@@ -119,5 +127,6 @@ struct PlayMode : Mode {
 		load(6, 31, "assets/corona.png");
 		load(5, 0, "assets/cloud1.png");
 		load(5, 1, "assets/cloud2.png");
+		load(3, 2, "assets/ground.png");
 	};
 };
