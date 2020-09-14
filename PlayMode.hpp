@@ -54,7 +54,6 @@ struct PlayMode : Mode {
 
 	int prev1 = 0;
 	int prev2 = 240;
-	int prevx = 240;
 
 	//player position:
 	glm::vec2 player_at = glm::vec2(120.0f, 30.0f);

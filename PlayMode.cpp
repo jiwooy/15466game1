@@ -39,12 +39,9 @@ PlayMode::PlayMode() {
 	std::uniform_int_distribution<int> xcoord(0, 240);
 	for (uint8_t i = 0; i < numPlatforms - 1; i++) { //3 - 18
 		r += (int) (230 / numPlatforms);
-		std::uniform_int_distribution<int> ycoord(r, r + 2);
 		gen.seed(std::random_device{}());
 		std::uniform_int_distribution<int> xcoord(prev1, prev2);
 		int x = xcoord(gen);
-		int y = ycoord(gen);
-		prevx = x;
 		uint8_t c1 = (i * 2) + 3;
 		uint8_t c2 = c1 + 1;
 		prev1 = std::max(0, x - 60);
