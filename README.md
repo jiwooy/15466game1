@@ -1,8 +1,10 @@
-# (TODO: your game's title)
+# Pandemic Escape!
 
-Author: (TODO: your name)
+Author: Jiwoo Yoo
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: The surface of Earth is a real bad place right now...Luckily, the sky is
+much better! Jump from platform to platform while dodging the virus particles,
+get as high as you can!
 
 Screen Shot:
 
@@ -10,13 +12,19 @@ Screen Shot:
 
 How Your Asset Pipeline Works:
 
-(TODO: describe the steps in your asset pipeline, from source files to tiles/backgrounds/whatever you upload to the PPU466.)
+Sprites are passed to a function that will read them as pngs using functions from
+load_save_png. Their palettes and tile is mapped and saved in that function.
+Another function calls this multiple times for each asset. 
+This function gets loaded for call_load_functions
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+Use the arrow keys to move.
+Use the up arrow key to jump.
+The game ends when the player catches the disease, or falls off the screen.
+And it seems getting higher slows the infection of the disease? Food for thought.
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: All sprites were drawn by me.
 
 This game was built with [NEST](NEST.md).
 

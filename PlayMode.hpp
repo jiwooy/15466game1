@@ -22,7 +22,10 @@ struct PlayMode : Mode {
 	virtual void update(float elapsed) override;
 	virtual void draw(glm::uvec2 const &drawable_size) override;
 	virtual uint8_t platform();
-	virtual void update_platforms();
+	virtual void update_platforms(float diff, float elapsed);
+	virtual void update_corona(float diff, float elapsed);
+	virtual bool check_damage();
+	void update_health(float move, bool damaged);
 
 	//----- game state -----
 
@@ -37,10 +40,21 @@ struct PlayMode : Mode {
 
 	float yvel = 0.0f;
 	float gravity = -100.0f;
-	float jump = 130.0f;
+	float jump = 110.0f;
 	float PlayerSpeed = 100.0f;
 
-	uint8_t numPlatforms = 9;
+	float total_elapsed = 0.0f;
+	float print_timer = 5.0f;
+
+	uint8_t numPlatforms = 14;
+	uint8_t otherSprites = 1 + (2 * numPlatforms);
+
+	float health = 100.0f;
+	float altitude = 0.0f;
+
+	int prev1 = 0;
+	int prev2 = 240;
+	int prevx = 240;
 
 	//player position:
 	glm::vec2 player_at = glm::vec2(120.0f, 30.0f);
@@ -49,84 +63,13 @@ struct PlayMode : Mode {
 
 	PPU466 ppu;
 
-
-	void load(uint8_t palette, uint8_t tile, std::string f) {
-		glm::uvec2 size = glm::ivec2(8,8);
-		std::vector< glm::u8vec4 > picdata(8*8);
-		load_png(f, &size, &picdata, LowerLeftOrigin);
-		ppu.palette_table[palette] = {
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		};
-		uint8_t colors = 0;
-		for (uint8_t i = 0; i < picdata.size(); i++) { // get colors for palette
-			if (picdata[i].a != 0 && colors < 4) {
-				bool notin = true;
-				for (int j = 0; j < colors; j++) {
-					if (picdata[i].r == ppu.palette_table[palette][j].r &&
-						picdata[i].g == ppu.palette_table[palette][j].g &&
-						picdata[i].b == ppu.palette_table[palette][j].b &&
-						picdata[i].a == ppu.palette_table[palette][j].a) {
-						notin = false;
-					}
-				}
-				if (notin) {
-					ppu.palette_table[palette][colors] = glm::u8vec4(picdata[i].r, picdata[i].g,
-															picdata[i].b, picdata[i].a);
-					colors += 1;
-				}
-			}
-		}
-		// printf("colors %d\n", colors);
-		// for (int i = 0; i < colors; i ++) {
-		// 	printf("%d %d %d %d \n", ppu.palette_table[7][i].r,  ppu.palette_table[7][i].g,
-		// 	ppu.palette_table[7][i].b, ppu.palette_table[7][i].a);
-		// }
-
-		for (int i = 0; i < picdata.size() / 8; i++) {
-			uint8_t row0 = 0b11111111;
-			uint8_t row1 = 0b11111111;
-			uint8_t bit = 0;
-			for (int j = 0; j < 8; j++) {
-				//printf("%d %d %d %d \n", picdata[(i * 8) + j].r,  picdata[(i * 8) + j].g,
-				//picdata[(i * 8) + j].b, picdata[(i * 8) + j].a);
-				uint8_t oper = 1 << bit;
-				if (picdata[(i * 8) + j].r == ppu.palette_table[palette][0].r &&
-					picdata[(i * 8) + j].g == ppu.palette_table[palette][0].g &&
-					picdata[(i * 8) + j].b == ppu.palette_table[palette][0].b &&
-					picdata[(i * 8) + j].a == ppu.palette_table[palette][0].a) {
-					row0 ^= oper;
-					row1 ^= oper;
-				} else if (picdata[(i * 8) + j].r == ppu.palette_table[palette][1].r &&
-					picdata[(i * 8) + j].g == ppu.palette_table[palette][1].g &&
-					picdata[(i * 8) + j].b == ppu.palette_table[palette][1].b &&
-					picdata[(i * 8) + j].a == ppu.palette_table[palette][1].a) {
-					row1 ^= oper;
-				} else if (picdata[(i * 8) + j].r == ppu.palette_table[palette][2].r &&
-					picdata[(i * 8) + j].g == ppu.palette_table[palette][2].g &&
-					picdata[(i * 8) + j].b == ppu.palette_table[palette][2].b &&
-					picdata[(i * 8) + j].a == ppu.palette_table[palette][2].a) {
-					row0 ^= oper;
-				} else if (picdata[(i * 8) + j].r == ppu.palette_table[palette][3].r &&
-					picdata[(i * 8) + j].g == ppu.palette_table[palette][3].g &&
-					picdata[(i * 8) + j].b == ppu.palette_table[palette][3].b &&
-					picdata[(i * 8) + j].a == ppu.palette_table[palette][3].a) {
-					// do nothing
-				}
-				bit++;
-			}
-			ppu.tile_table[tile].bit0[i] = row0;
-			ppu.tile_table[tile].bit1[i] = row1;
-		}
-	}
+	void load(uint8_t palette, uint8_t tile, std::string f);
 
 	std::function< void() > png_to_tile = [this]() {
-		load(7, 32, "assets/player.png");
-		load(6, 31, "assets/corona.png");
-		load(5, 0, "assets/cloud1.png");
-		load(5, 1, "assets/cloud2.png");
-		load(3, 2, "assets/ground.png");
+		load(7, 32, "assets\\player.png");
+		load(6, 31, "assets\\corona.png");
+		load(5, 0, "assets\\cloud1.png");
+		load(5, 1, "assets\\cloud2.png");
+		load(3, 2, "assets\\ground.png");
 	};
 };
